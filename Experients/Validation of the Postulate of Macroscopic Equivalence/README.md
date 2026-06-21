@@ -52,11 +52,8 @@ All tunable parameters are declared in the `CONFIGURATION` block within the scri
 * `expA_between_class_cascade.csv`
   Long format: `(archetype, instance_id, theta, run_id, outcome)`.
 
-* `expA_fig_sir_curves.png`
-  SIR epidemic curves, mean $\pm$ SEM across instances $\times$ repeats.
-
-* `expA_fig_cascade_curves.png`
-  Cascade curves, same aggregation.
+* `expA_fig_combined.png`
+  SIR epidemic and cascade curves, mean $\pm$ SEM across instances $\times$ repeats.
 
 * `expA_fig_icc_distributions.png`
   ICC distributions across replications, $\frac{{\epsilon}}{{2}}$ vs full-$\epsilon$, per archetype/dynamic.
