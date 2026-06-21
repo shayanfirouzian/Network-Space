@@ -1000,55 +1000,61 @@ ARCHETYPE_COLORS = {
 EPS_COLORS = {'eps_half': '#4C72B0', 'eps_full': '#C44E52'}
 
 
-def make_sir_cascade_figures(sir_df, cascade_df):
-    # --- Figure 1: SIR epidemic curves, mean +/- SEM across (instance x repeat) ---
-    fig, ax = plt.subplots(figsize=(8, 5.5))
-    for arche_name in ARCHETYPE_CENTERS:
-        sub = sir_df[sir_df.archetype == arche_name]
-        means = sub.groupby('beta')['outcome'].mean()
-        sems = sub.groupby('beta')['outcome'].sem()
-        ax.errorbar(means.index, means.values, yerr=sems.values,
-                     label=f"{arche_name} (tau_c={TAU_C[arche_name]:.3f})",
-                     color=ARCHETYPE_COLORS[arche_name], marker='o',
-                     markersize=4, capsize=2, linewidth=1.5)
-        ax.axvline(TAU_C[arche_name], color=ARCHETYPE_COLORS[arche_name],
-                   linestyle='--', alpha=0.4)
-    ax.set_xlabel(r'Transmission probability $\beta$')
-    ax.set_ylabel('Final outbreak size (fraction of N)')
-    n_total = N_A2_INSTANCES * N_SIR_RUNS
-    ax.set_title('Simple Contagion (SIR): Epidemic Curves by Archetype\n'
-                  f'(mean $\\pm$ SEM, n={n_total} = {N_A2_INSTANCES} instances '
-                  f'x {N_SIR_RUNS} repeats per point)')
-    ax.set_xscale('log')
-    ax.legend(fontsize=8)
-    ax.grid(alpha=0.3)
-    fig.tight_layout()
-    fig.savefig(_path('expA_fig_sir_curves.png'), dpi=150)
-    plt.close(fig)
+def make_sir_cascade_figure(sir_df, cascade_df):
+    # --- Single figure with two subplots: (b) cascade left, (a) SIR right ---
+    fig, (ax_right, ax_left) = plt.subplots(1, 2, figsize=(16, 6))
 
-    # --- Figure 2: Cascade adoption curves ---
-    fig, ax = plt.subplots(figsize=(8, 5.5))
+    # ---------- (b) Cascade adoption curves (left) ----------
     for arche_name in ARCHETYPE_CENTERS:
         sub = cascade_df[cascade_df.archetype == arche_name]
         means = sub.groupby('theta')['outcome'].mean()
         sems = sub.groupby('theta')['outcome'].sem()
-        ax.errorbar(means.index, means.values, yerr=sems.values,
-                     label=f"{arche_name} (RI={RI[arche_name]:.3f})",
-                     color=ARCHETYPE_COLORS[arche_name], marker='o',
-                     markersize=4, capsize=2, linewidth=1.5)
-    ax.set_xlabel(r'Adoption threshold $\theta$')
-    ax.set_ylabel('Final adoption fraction')
+        ax_left.errorbar(means.index, means.values, yerr=sems.values,
+                         label=f"{arche_name} (RI={RI[arche_name]:.3f})",
+                         color=ARCHETYPE_COLORS[arche_name], marker='o',
+                         markersize=4, capsize=2, linewidth=1.5)
+    ax_left.set_xlabel(r'Adoption threshold $\theta$')
+    ax_left.set_ylabel('Final adoption fraction')
     n_total = N_A2_INSTANCES * N_CASCADE_RUNS
-    ax.set_title('Complex Contagion (Threshold Model): Cascade Curves by Archetype\n'
-                  f'(mean $\\pm$ SEM, n={n_total} = {N_A2_INSTANCES} instances '
-                  f'x {N_CASCADE_RUNS} repeats per point)')
-    ax.legend(fontsize=8)
-    ax.grid(alpha=0.3)
-    fig.tight_layout()
-    fig.savefig(_path('expA_fig_cascade_curves.png'), dpi=150)
+    ax_left.set_title('Complex Contagion (Threshold Model): Cascade')
+    ax_left.legend(fontsize=8)
+    ax_left.grid(alpha=0.3)
+
+    # ---------- (a) SIR epidemic curves (right) ----------
+    for arche_name in ARCHETYPE_CENTERS:
+        sub = sir_df[sir_df.archetype == arche_name]
+        means = sub.groupby('beta')['outcome'].mean()
+        sems = sub.groupby('beta')['outcome'].sem()
+        ax_right.errorbar(means.index, means.values, yerr=sems.values,
+                          label=f"{arche_name} (tau_c={TAU_C[arche_name]:.3f})",
+                          color=ARCHETYPE_COLORS[arche_name], marker='o',
+                          markersize=4, capsize=2, linewidth=1.5)
+        ax_right.axvline(TAU_C[arche_name], color=ARCHETYPE_COLORS[arche_name],
+                         linestyle='--', alpha=0.4)
+    ax_right.set_xlabel(r'Transmission probability $\beta$')
+    ax_right.set_ylabel('Final outbreak size (fraction of N)')
+    n_total = N_A2_INSTANCES * N_SIR_RUNS
+    ax_right.set_title('Simple Contagion (SIR): Epidemic')
+    ax_right.set_xscale('log')
+    ax_right.legend(fontsize=8)
+    ax_right.grid(alpha=0.3)
+
+    fig.suptitle(f'Simple and Complex Contagion Curves by Archetype\n(mean $\\pm$ SEM, n={n_total} = {N_A2_INSTANCES} instances x {N_SIR_RUNS} repeats per point)', ha='center',
+                 fontsize=12, y=0.97)
+
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
+
+    ax_left.annotate('(b)', xy=(0.5, 0), xytext=(0, -50),
+                     xycoords='axes fraction', textcoords='offset points',
+                     ha='center', va='top', fontsize=14, fontweight='bold')
+    ax_right.annotate('(a)', xy=(0.5, 0), xytext=(0, -50),
+                      xycoords='axes fraction', textcoords='offset points',
+                      ha='center', va='top', fontsize=14, fontweight='bold')
+
+    fig.savefig(_path('expA_fig_combined.png'), dpi=300, bbox_inches='tight')
     plt.close(fig)
 
-    print("\nFigures saved: expA_fig_sir_curves.png, expA_fig_cascade_curves.png")
+    print("\nFigure saved: expA_fig_combined.png")
 
 
 def make_icc_figure(anova_df):
@@ -1145,7 +1151,7 @@ if __name__ == '__main__':
     tasks_df, anova_df, icc_summary_df = run_part_A1()[:3]
     sir_df, cascade_df, a2_summary_df = run_part_A2()
 
-    make_sir_cascade_figures(sir_df, cascade_df)
+    make_sir_cascade_figure(sir_df, cascade_df)
     make_icc_figure(anova_df)
 
     print(f"\n=== TOTAL RUNTIME: {(time.time()-t_total0)/60:.2f} minutes ===")
