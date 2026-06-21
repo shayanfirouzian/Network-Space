@@ -809,39 +809,62 @@ def make_width_vs_K_figure(by_k_df):
     """For each archetype: width_raw (mean +/- 95% CI across instances) vs
     K, for the symmetric conditions C2-C5 (K=2..5), with C1 (K=2, original
     refresh) shown as a separate reference marker."""
-    fig, axes = plt.subplots(1, 5, figsize=(18, 4), sharey=True)
+    fig, axes = plt.subplots(2, 3, figsize=(18, 9), sharey=True)
 
     sym_conditions = ['C2', 'C3', 'C4', 'C5']
 
     for idx, arche_name in enumerate(ARCHETYPE_LIST):
-        ax = axes[idx]
+        ax = axes.flat[idx]
         sub = by_k_df[(by_k_df.archetype == arche_name) & (by_k_df.metric == 'width_raw')]
 
         sym = sub[sub.condition.isin(sym_conditions)].sort_values('K')
-        ax.errorbar(sym.K, sym['mean'], yerr=sym['ci95'], marker='o',
-                     color='#55A868', linewidth=2, capsize=4,
-                     label='Symmetric refresh (C2-C5)')
+        ax.errorbar(
+            sym.K, sym['mean'], yerr=sym['ci95'],
+            marker='o', color='#55A868', linewidth=2, capsize=4,
+            label='Symmetric refresh (C2-C5)'
+        )
 
         c1 = sub[sub.condition == 'C1']
         if len(c1) > 0:
-            ax.errorbar([2], c1['mean'], yerr=c1['ci95'], marker='s',
-                         color='#4C72B0', markersize=8, capsize=4,
-                         label='C1 (K=2, original refresh)')
+            ax.errorbar(
+                [2], c1['mean'], yerr=c1['ci95'],
+                marker='s', color='#4C72B0', markersize=8, capsize=4,
+                label='C1 (K=2, original refresh)'
+            )
 
         ax.set_title(arche_name)
-        ax.set_xlabel('K (number of communities)')
+        ax.set_xlabel('K (number of communities)' if idx == 0 else 'K')
         ax.set_xticks([2, 3, 4, 5])
-        if idx == 0:
-            ax.set_ylabel(r'Achievable $\mu$-range width')
-            ax.legend(fontsize=8)
         ax.grid(alpha=0.3)
 
-    title_line1 = r'Experiment B: Achievable $\mu$-Range Width vs Partition Granularity K'
-    title_line2 = (f'(mean $\\pm$ 95% CI across {N_INSTANCES_PER_ARCHETYPE} '
-                    'instances per archetype)')
+    axes.flat[5].axis('off')
+
+    title_line1 = r'Achievable $\mu$-Range Width vs Partition Granularity K'
+    title_line2 = (
+        f'(mean $\\pm$ 95% CI across {N_INSTANCES_PER_ARCHETYPE} '
+        'instances per archetype)'
+    )
     fig.suptitle(title_line1 + '\n' + title_line2, fontsize=12)
-    fig.tight_layout()
-    fig.savefig(_path('expB_fig_width_vs_K.png'), dpi=150)
+
+    fig.tight_layout(rect=[0.06, 0, 1, 0.96])
+
+    row1_center = (axes[0, 0].get_position().y0 + axes[0, 0].get_position().y1) / 2
+    row2_center = (axes[1, 0].get_position().y0 + axes[1, 0].get_position().y1) / 2
+
+    fig.text(
+        0.015, row1_center, r'Achievable $\mu$-range width',
+        rotation=90, va='center', ha='center'
+    )
+    fig.text(
+        0.015, row2_center, r'Achievable $\mu$-range width',
+        rotation=90, va='center', ha='center'
+    )
+
+    # Legend in the blank bottom-right panel
+    handles, labels = axes.flat[0].get_legend_handles_labels()
+    axes.flat[5].legend(handles, labels, loc='center', fontsize=8, frameon=True)
+
+    fig.savefig(_path('expB_fig_width_vs_K.png'), dpi=300)
     plt.close(fig)
     print("Figure saved: expB_fig_width_vs_K.png")
 
