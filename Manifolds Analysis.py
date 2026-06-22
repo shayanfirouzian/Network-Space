@@ -45,8 +45,7 @@ nd50  = full_report(d50,50)
 nd100 = full_report(d100,100)
 nd150 = full_report(d150,150)
 
-#%%
-# --- Sensitivity analysis for the revised partition ---
+# --- Sensitivity analysis for the partition ---
 print("\n\n=== SENSITIVITY ANALYSIS ===\n\n")
 
 for N in [50, 100, 150]:
