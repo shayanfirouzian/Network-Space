@@ -797,10 +797,10 @@ def make_mu_range_figure(sweep_df):
                   f'per archetype ({len(MU_TARGET_GRID)}-point mu grid)',
                   ha='center', transform=axes[5].transAxes, fontsize=9, style='italic')
 
-    fig.suptitle(r'Experiment B: Achievable $\mu$ vs Target $\mu$, by Partition '
-                  r'Scheme (K=2..5)', fontsize=13)
+    fig.suptitle(r'Achievable $\mu$ vs Target $\mu$, by Partition '
+                  r'Scheme (K=2:5)', fontsize=13)
     fig.tight_layout()
-    fig.savefig(_path('expB_fig_mu_range.png'), dpi=150)
+    fig.savefig(_path('expB_fig_mu_range.png'), dpi=300)
     plt.close(fig)
     print("\nFigure saved: expB_fig_mu_range.png")
 
